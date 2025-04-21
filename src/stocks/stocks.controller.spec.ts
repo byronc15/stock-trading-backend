@@ -1,4 +1,3 @@
-// src/stocks/stocks.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { StocksController } from './stocks.controller';
 import { StocksService } from './stocks.service';

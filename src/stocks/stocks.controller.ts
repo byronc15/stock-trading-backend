@@ -1,5 +1,4 @@
-// src/stocks/stocks.controller.ts
-import { Controller, Get, Param, NotFoundException, Logger } from '@nestjs/common';
+import { Controller, Get, Param, Logger } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { FullStockData, StockHistoryPoint } from './interfaces/stock.interface';
 
@@ -12,22 +11,21 @@ export class StocksController {
   @Get()
   async getAllStocks(): Promise<FullStockData[]> {
     this.logger.log('Request received for all supported stocks');
-    // Now returns the full simulated data
     return this.stocksService.getAllSupportedStocks();
   }
 
   @Get(':symbol')
   async getSingleStockData(@Param('symbol') symbol: string): Promise<FullStockData> {
     this.logger.log(`Request received for single stock: ${symbol}`);
-    // Throws NotFoundException if symbol is invalid
+    // Service method throws NotFoundException if symbol is invalid
     return this.stocksService.getStockData(symbol.toUpperCase());
   }
 
-  // New endpoint for historical data
+  // Endpoint for recent historical price data
   @Get(':symbol/history')
   async getStockHistory(@Param('symbol') symbol: string): Promise<StockHistoryPoint[]> {
     this.logger.log(`Request received for stock history: ${symbol}`);
-    // Throws NotFoundException if symbol is invalid or has no history
+    // Service method throws NotFoundException if symbol is invalid
     return this.stocksService.getStockHistory(symbol.toUpperCase());
   }
 }

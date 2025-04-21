@@ -1,9 +1,8 @@
-// src/stocks/stocks.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { StocksService } from './stocks.service';
 import { NotFoundException } from '@nestjs/common';
 
-// Mock timers
+// Use Jest's fake timers to control setInterval in the service
 jest.useFakeTimers();
 
 describe('StocksService', () => {
@@ -15,17 +14,12 @@ describe('StocksService', () => {
     }).compile();
 
     service = module.get<StocksService>(StocksService);
-    // We need to manually call onModuleInit if testing lifecycle hooks
-    // or trigger initialization differently if needed.
-    // For simplicity here, initialization happens in constructor.
   });
 
    afterEach(() => {
-     // Clear any intervals set by the service if necessary
-     // Although usually Jest handles this with fake timers
+     // Clear timers between tests
      jest.clearAllTimers();
    });
-
 
   it('should be defined', () => {
     expect(service).toBeDefined();
@@ -37,11 +31,8 @@ describe('StocksService', () => {
           expect(allStocks.length).toBeGreaterThan(0);
           const aapl = allStocks.find(s => s.symbol === 'AAPL');
 
-          // Ensure 'aapl' exists before proceeding
           expect(aapl).toBeDefined();
-
-          // Add type guard check
-          if (aapl) {
+          if (aapl) { // Type guard for TypeScript
               expect(aapl.price).toBeGreaterThan(0);
               expect(aapl.open).toEqual(aapl.price);
               expect(aapl.change).toEqual(0);
@@ -55,7 +46,7 @@ describe('StocksService', () => {
 
        it('should initialize history for supported stocks', () => {
            const aaplHistory = service.getStockHistory('AAPL');
-           expect(aaplHistory).toHaveLength(1); // Starts with initial point
+           expect(aaplHistory).toHaveLength(1); // Should start with one history point
            const aaplData = service.getStockData('AAPL');
            expect(aaplHistory[0].price).toEqual(aaplData.price);
            expect(aaplHistory[0].timestamp).toEqual(aaplData.timestamp);
@@ -64,7 +55,7 @@ describe('StocksService', () => {
 
   describe('Data Retrieval', () => {
       it('getAllSupportedStocks should return all initialized stocks', () => {
-          // Relies on the hardcoded list size in the service
+          // Test relies on the hardcoded list size (6) in the service
           expect(service.getAllSupportedStocks()).toHaveLength(6);
       });
 
@@ -82,7 +73,7 @@ describe('StocksService', () => {
       it('getStockHistory should return history for a valid symbol', () => {
           const history = service.getStockHistory('TSLA');
           expect(history).toBeInstanceOf(Array);
-          expect(history.length).toBeGreaterThanOrEqual(1); // Should have at least initial point
+          expect(history.length).toBeGreaterThanOrEqual(1);
           expect(history[0]).toHaveProperty('timestamp');
           expect(history[0]).toHaveProperty('price');
       });
@@ -94,16 +85,15 @@ describe('StocksService', () => {
 
   describe('Price Simulation', () => {
       it('should update stock prices after interval', () => {
-          const initialAapl = { ...service.getStockData('AAPL') }; // Copy initial state
+          const initialAapl = { ...service.getStockData('AAPL') };
 
-          // Fast-forward time past the simulation interval
-          jest.advanceTimersByTime(5000 + 100); // Advance by SIMULATION_INTERVAL_MS + buffer
+          // Fast-forward time using fake timers
+          jest.advanceTimersByTime(5000 + 100); // SIMULATION_INTERVAL_MS + buffer
 
           const updatedAapl = service.getStockData('AAPL');
 
-          expect(updatedAapl.price).not.toEqual(initialAapl.price); // Price should change
-          expect(updatedAapl.timestamp).toBeGreaterThan(initialAapl.timestamp); // Timestamp updated
-          // Other fields like change, high, low, volume should also potentially change
+          expect(updatedAapl.price).not.toEqual(initialAapl.price);
+          expect(updatedAapl.timestamp).toBeGreaterThan(initialAapl.timestamp);
           expect(updatedAapl.change).not.toEqual(0);
           expect(updatedAapl.changePercent).not.toEqual(0);
           expect(updatedAapl.high).toBeGreaterThanOrEqual(updatedAapl.price);
@@ -122,12 +112,11 @@ describe('StocksService', () => {
        });
 
        it('should limit history size', () => {
-           // Advance time enough times to exceed max history points
-           const intervalsToRun = 110; // More than MAX_HISTORY_POINTS
+           const intervalsToRun = 110; // Set higher than MAX_HISTORY_POINTS
            jest.advanceTimersByTime(intervalsToRun * 5000 + 100);
 
            const history = service.getStockHistory('AMZN');
-           // MAX_HISTORY_POINTS (100) + initial point = 101, but simulation removes oldest
+           // Expect history length to be capped at MAX_HISTORY_POINTS (100)
            expect(history.length).toBe(100);
        });
   });

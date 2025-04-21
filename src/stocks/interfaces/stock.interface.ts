@@ -1,5 +1,3 @@
-// src/stocks/interfaces/stock.interface.ts
-
 export interface StockTickData {
     price: number;
     change: number;
@@ -7,9 +5,9 @@ export interface StockTickData {
     open: number;
     high: number;
     low: number;
-    volume: number; // Simulated volume for the current 'day'
-    previousClose?: number; // Optional: Price at the end of the last 'day'
-    timestamp: number; // Last update time
+    volume: number;
+    previousClose?: number;
+    timestamp: number;
   }
   
   export interface StockDefinition {

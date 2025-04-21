@@ -19,7 +19,7 @@ This project implements the backend REST API for a simplified stock trading simu
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/byronc15/stock-trading-backend.git
     cd stock-trading-backend
     ```
 
